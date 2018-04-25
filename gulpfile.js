@@ -24,6 +24,7 @@ const babelify = require('babelify');
 const webpack = require('webpack-stream');
 const package = require('./package.json');
 const webserver = require('gulp-webserver');
+const source = require('vinyl-source-stream');
 // var replace = require('gulp-replace');
 
 
@@ -239,18 +240,20 @@ gulp.task('react:browserify', function() {
     }); // use the reactify transform
     return b.bundle()
         .pipe(source('index.js'))
-        // .pipe(buffer())
-        // .pipe(uglify())
+        .pipe(buffer())
+        .pipe(uglify())
         .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
 
 })
 
 gulp.task('react:webpack', function() {
+
     return gulp.src(PATHS.src + '/js/index.js')
         .pipe(webpack(require('./config/webpack.config.dev')))
-        // .pipe(buffer())
-        // .pipe(uglify())
+        //    .pipe(buffer())
+        //    .pipe(uglify())
         .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+
 });
 
 gulp.task('webserver', function() {
