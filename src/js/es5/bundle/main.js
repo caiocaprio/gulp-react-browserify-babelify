@@ -3,7 +3,7 @@ var Main = {
         var _self = this;
         Menu.init();
         Modal.init();
-        AcessibilityService.init();
+        AcessibilityService.init(); 
         // Search.init();
 
         _self.addEventListeners();
@@ -11,8 +11,8 @@ var Main = {
     addEventListeners: function() {
         var _self = this;
         console.log('addEventListeners', _self.$menuToogleButton);
-    },
-
+    }, 
+ 
 }
 
 // var Search = {

@@ -1,6 +1,18 @@
 {
     "env": {
-        "presets": ["babel-preset-env", "react"]
-            // "plugins": ["transform-runtime", "transform-object-assign", "rewire", "lodash", "inline-replace-variables", "transform-object-rest-spread"]
+        "development": {
+            "presets": ["babel-preset-env", "react"]
+        },
+        "production": {
+            "presets": ["babel-preset-env", "react"],
+            "plugins": [
+                [
+                    "transform-react-remove-prop-types",
+                    {
+                        "mode": "wrap"
+                    }
+                ]
+            ]
+        }
     }
 }

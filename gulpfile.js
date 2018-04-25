@@ -1,55 +1,46 @@
-var gulp = require('gulp');
-var pug = require('gulp-pug');
-var sourcemaps = require('gulp-sourcemaps');
-var clean = require('gulp-clean');
-var autoprefixer = require('gulp-autoprefixer');
-var del = require('del'); // rm -rf
-var uglify = require('gulp-uglify');
-var pump = require('pump');
-var runSequence = require('run-sequence').use(gulp);
-var babel = require('gulp-babel');
-var watch = require('gulp-watch');
-var minifyCSS = require('gulp-minify-css');
-var compass = require('gulp-compass');
-var sass = require('gulp-sass');
-var minifyJs = require("gulp-minify");
-var spritesmith = require('gulp.spritesmith');
-var rename = require('gulp-rename');
-var concat = require('gulp-concat')
-var jsmin = require('gulp-jsmin');
-
-var browserify = require('browserify');
-var gutil = require('gulp-util');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var babelify = require('babelify');
-var reactify = require('reactify');
+const gulp = require('gulp');
+const pug = require('gulp-pug');
+const sourcemaps = require('gulp-sourcemaps');
+const clean = require('gulp-clean');
+const autoprefixer = require('gulp-autoprefixer');
+const del = require('del'); // rm -rf
+const uglify = require('gulp-uglify');
+const pump = require('pump');
+const runSequence = require('run-sequence').use(gulp);
+const babel = require('gulp-babel');
+const watch = require('gulp-watch');
+const minifyCSS = require('gulp-minify-css');
+const compass = require('gulp-compass');
+const sass = require('gulp-sass');
+const minifyJs = require("gulp-minify");
+const spritesmith = require('gulp.spritesmith');
+const rename = require('gulp-rename');
+const concat = require('gulp-concat')
+const jsmin = require('gulp-jsmin');
+const browserify = require('browserify');
+const gutil = require('gulp-util');
+const buffer = require('vinyl-buffer');
+const babelify = require('babelify');
+const webpack = require('webpack-stream');
+const package = require('./package.json');
+const webserver = require('gulp-webserver');
 // var replace = require('gulp-replace');
 
 
-var defaults = {
-    app: '.',
-    src: 'assets/src',
-    dev: 'assets/dist',
-    dist: 'assets/dist',
-    distScripts: 'assets/dist/js',
-    devSprites: '../../dist/img',
-    distSprites: '../../dist/img',
-    imgPathSprites: '/assets/dist/img'
-};
+const PATHS = require('./config/vars');
 
-var cdn = {
+const cdn = {
     img: {
         url: 'http://cdn.img.com',
-        replace: defaults.dist + '/img'
+        replace: PATHS.dist + PATHS.assetsPath + '/img'
     },
     font: {
         url: 'http://cdn.font.com',
-        replace: defaults.dist + '/font'
+        replace: PATHS.dist + PATHS.assetsPath + '/font'
     },
 }
 
-var pumpCb = function(err) {
+const pumpCb = function(err) {
     if (err) {
         console.log('Error: ', err.toString());
     }
@@ -57,30 +48,30 @@ var pumpCb = function(err) {
 
 /* CLEAN DEV */
 gulp.task('clean:dev', function() {
-    return del.sync([defaults.dev]);
+    return del.sync([PATHS.dev]);
 });
 
 /* CLEAN DIST */
 gulp.task('clean:dist', function() {
-    return del.sync([defaults.dist]);
+    return del.sync([PATHS.dist]);
 });
 
 /* SASS DEV */
 gulp.task('sass:dev', function(pumpCb) {
     pump([
-            gulp.src(defaults.src + '/scss/**/*.scss'),
+            gulp.src(PATHS.src + '/scss/**/*.scss'),
             sourcemaps.init(),
             sass({ outputStyle: 'expanded' }).on('error', sass.logError),
             autoprefixer(),
             sourcemaps.write('.'),
             // compass({
             //     style: 'expanded',
-            //     css: defaults.dev + '/css',
-            //     sass: defaults.src + '/scss',
-            //     image: defaults.dev + '/img',
+            //     css: PATHS.dev + '/css',
+            //     sass: PATHS.src + '/scss',
+            //     image: PATHS.dev + '/img',
             //     sourcemap: true
             // }),
-            gulp.dest(defaults.dev + '/css')
+            gulp.dest(PATHS.dev + PATHS.assetsPath +'/css')
         ],
         pumpCb
     );
@@ -89,18 +80,18 @@ gulp.task('sass:dev', function(pumpCb) {
 /* SASS DIST */
 gulp.task('sass:dist', function(pumpCb) {
     pump([
-            gulp.src(defaults.src + '/scss/**/*.scss'),
+            gulp.src(PATHS.src + '/scss/**/*.scss'),
             sass({ outputStyle: 'compressed' }).on('error', sass.logError),
             // sass({
             //     style: 'compressed',
-            //     css: defaults.dev + '/css',
-            //     sass: defaults.src + '/scss',
-            //     image: defaults.dist + '/img'
+            //     css: PATHS.dev + '/css',
+            //     sass: PATHS.src + '/scss',
+            //     image: PATHS.dist + '/img'
             // }),
             autoprefixer(),
             // replace(cdn.img.replace, cdn.img.url),
             // replace(cdn.font.replace, cdn.font.url),
-            gulp.dest(defaults.dist + '/css')
+            gulp.dest(PATHS.dist + PATHS.assetsPath +'/css')
         ],
         pumpCb
     );
@@ -109,7 +100,7 @@ gulp.task('sass:dist', function(pumpCb) {
 /* JS DEV */
 gulp.task('js:dev', function(pumpCb) {
     pump([
-            gulp.src(defaults.src + '/js/**/*.js'),
+            gulp.src(PATHS.src + '/js/es5/**/*.js'),
             minifyJs({
                 ext: {
                     src: '.js',
@@ -120,7 +111,7 @@ gulp.task('js:dev', function(pumpCb) {
                 ignoreFiles: ['.combo.js', '-min.js']
             }),
             // sourcemaps.write('.'),
-            gulp.dest(defaults.dev + '/js')
+            gulp.dest(PATHS.dev + PATHS.assetsPath +'/js')
         ],
         pumpCb
     );
@@ -129,7 +120,7 @@ gulp.task('js:dev', function(pumpCb) {
 /* JS DIST */
 gulp.task('js:dist', function(pumpCb) {
     pump([
-            gulp.src(defaults.src + '/js/**/*.js'),
+            gulp.src(PATHS.src + '/js/es5/**/*.js'),
             minifyJs({
                 ext: {
                     src: '.debug.js',
@@ -140,7 +131,7 @@ gulp.task('js:dist', function(pumpCb) {
                 ignoreFiles: ['.combo.js', '-min.js']
             }),
             jsmin(),
-            gulp.dest(defaults.dist + '/js')
+            gulp.dest(PATHS.dist + PATHS.assetsPath + '/js')
         ],
         pumpCb
     );
@@ -149,19 +140,19 @@ gulp.task('js:dist', function(pumpCb) {
 /* JS BUNDLE */
 gulp.task('bundle:js', function() {
     return gulp.src([
-        defaults.src + '/third-party/material-kit/assets/js/core/jquery.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/core/popper.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/bootstrap-material-design.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/moment.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/bootstrap-datetimepicker.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/nouislider.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/bootstrap-selectpicker.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/bootstrap-tagsinput.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/jasny-bootstrap.min.js',
-        defaults.src + '/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
-        defaults.src + '/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
-        defaults.src + '/third-party/material-kit/assets/js/material-kit.min.js',
-        defaults.src + '/js/es5/bundle/**/*.js'
+        PATHS.src + '/third-party/material-kit/assets/js/core/jquery.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/core/popper.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/bootstrap-material-design.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/moment.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-datetimepicker.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/nouislider.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-selectpicker.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-tagsinput.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/jasny-bootstrap.min.js',
+        PATHS.src + '/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
+        PATHS.src + '/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
+        PATHS.src + '/third-party/material-kit/assets/js/material-kit.min.js',
+        PATHS.src + '/js/es5/bundle/**/*.js'
     ])
 
     .pipe(concat('all.js'))
@@ -175,104 +166,68 @@ gulp.task('bundle:js', function() {
             ignoreFiles: ['.combo.js']
         }))
         .pipe(jsmin())
-        .pipe(gulp.dest(defaults.dist + '/js'));
+        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath +'/js'));
 });
 
-/*
-  <script src="./assets/js/core/jquery.min.js"></script>
-    <script src="./assets/js/core/popper.min.js"></script>
-    <script src="./assets/js/bootstrap-material-design.js"></script>
-    <!--  Google Maps Plugin  -->
-    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script> -->
-    <!--  Plugin for Date Time Picker and Full Calendar Plugin  -->
-    <script src="./assets/js/plugins/moment.min.js"></script>
-    <!--	Plugin for the Datepicker, full documentation here: https://github.com/Eonasdan/bootstrap-datetimepicker -->
-    <script src="./assets/js/plugins/bootstrap-datetimepicker.min.js"></script>
-    <!--	Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
-    <script src="./assets/js/plugins/nouislider.min.js"></script>
-    <!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
-    <script src="./assets/js/plugins/bootstrap-selectpicker.js"></script>
-    <!--	Plugin for Tags, full documentation here: http://xoxco.com/projects/code/tagsinput/  -->
-    <script src="./assets/js/plugins/bootstrap-tagsinput.js"></script>
-    <!--	Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
-    <script src="./assets/js/plugins/jasny-bootstrap.min.js"></script>
-    <!--	Plugin for Small Gallery in Product Page -->
-    <script src="./assets/js/plugins/jquery.flexisel.js"></script>
-    <!-- Plugins for presentation and navigation  -->
-    <script src="./assets/assets-for-demo/js/modernizr.js"></script>
-    <script src="./assets/assets-for-demo/js/vertical-nav.js"></script>
-    <!-- Material Kit Core initialisations of plugins and Bootstrap Material Design Library -->
-    <script src="./assets/js/material-kit.js?v=2.0.2"></script>
-    <!-- Fixed Sidebar Nav - js With initialisations For Demo Purpose, Don't Include it in your project -->
-    <script src="./assets/assets-for-demo/js/material-kit-demo.js"></script>
-     */
-
 gulp.task('sprite:dev', function() {
-    var spriteData = gulp.src(defaults.src + '/img/sprites/*.{png,gif}').pipe(spritesmith({
-        imgPath: defaults.imgPathSprites + '/sprites.png',
-        imgName: defaults.devSprites + '/sprites.png',
+    var spriteData = gulp.src(PATHS.src + '/img/sprites/*.{png,gif}').pipe(spritesmith({
+        imgPath: PATHS.imgPathSprites + '/sprites.png',
+        imgName: PATHS.devSprites + '/sprites.png',
         cssName: '_sprites.scss',
         padding: 20,
     }));
-    return spriteData.pipe(gulp.dest(defaults.src + '/scss/'));
+    return spriteData.pipe(gulp.dest(PATHS.src + '/scss/'));
 });
 
-
-
 gulp.task('sprite:dist', function() {
-    var spriteData = gulp.src(defaults.src + '/img/sprites/*.{png,gif}').pipe(spritesmith({
-        imgPath: defaults.imgPathSprites + '/sprites.png',
-        imgName: defaults.distSprites + '/sprites.png',
+    var spriteData = gulp.src(PATHS.src + '/img/sprites/*.{png,gif}').pipe(spritesmith({
+        imgPath: PATHS.imgPathSprites + '/sprites.png',
+        imgName: PATHS.distSprites + '/sprites.png',
         padding: 20,
         cssName: '_sprites.scss'
     }));
-    return spriteData.pipe(gulp.dest(defaults.src + '/scss/'));
+    return spriteData.pipe(gulp.dest(PATHS.src + '/scss/'));
 });
-
 
 /* SASS WATCH */
 gulp.task('watch', function() {
-    gulp.watch(defaults.src + '/scss/**/*.scss', ['sass:dev']);
-    gulp.watch(defaults.src + '/js-old/**/*.js', ['build-js:dev']);
-    gulp.watch([defaults.src + '/img/**/*',
-        '!' + defaults.src + '/img/sprites{,/**/*}'
+    gulp.watch(PATHS.src + '/scss/**/*.scss', ['sass:dev']);
+    gulp.watch(PATHS.src + '/js/es5/**/*.js', ['build-js:dev']);
+    gulp.watch(PATHS.src + '/js/(!bundle)**/*.js', ['react:webpack']);
+    gulp.watch([PATHS.src + '/img/**/*',
+        '!' + PATHS.src + '/img/sprites{,/**/*}'
     ], ['copy:img']);
-    gulp.watch(defaults.src + '/font/sprites/**/*', ['sprite:dev']);
-    gulp.watch(defaults.src + '/font/**/*', ['copy:font']);
-    gulp.watch(defaults.src + '/third-party/**/*', ['copy:third-party']);
-    gulp.watch(defaults.src + '/media/**/*', ['copy:media']);
+    gulp.watch(PATHS.src + '/font/sprites/**/*', ['sprite:dev']);
+    gulp.watch(PATHS.src + '/font/**/*', ['copy:font']);
+    gulp.watch(PATHS.src + '/html/**/*', ['copy:html']);
+    gulp.watch(PATHS.src + '/third-party/**/*', ['copy:third-party']);
+    gulp.watch(PATHS.src + '/media/**/*', ['copy:media']);
 
 });
 
 /* COPY */
+gulp.task('copy:html', function(pumpCb) {
+    return gulp.src([PATHS.src + '/html/**/*'], { base: PATHS.src + '/html' }).pipe(gulp.dest(PATHS.dev));
+})
 gulp.task('copy:img', function(pumpCb) {
-    return gulp.src([defaults.src + '/img/**/*', '!' + defaults.src + '/img/sprites{,/**/*}'], { base: defaults.src }).pipe(gulp.dest(defaults.dev));
+    return gulp.src([PATHS.src + '/img/**/*', '!' + PATHS.src + '/img/sprites{,/**/*}'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev+PATHS.assetsPath));
 })
 gulp.task('copy:font', function(pumpCb) {
-    return gulp.src([defaults.src + '/font/**/*'], { base: defaults.src }).pipe(gulp.dest(defaults.dev));
+    return gulp.src([PATHS.src + '/font/**/*'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
 })
 gulp.task('copy:media', function(pumpCb) {
-    return gulp.src([defaults.src + '/media/**/*'], { base: defaults.src }).pipe(gulp.dest(defaults.dev));
+    return gulp.src([PATHS.src + '/media/**/*'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
 })
 gulp.task('copy:third-party', function(pumpCb) {
     return gulp.src([
-        defaults.src + '/third-party/**/*.{js,css,jpg,gif,png,jpeg,ttf,svg,map,ico,eot,ttf,woff}',
-    ], { base: defaults.src }).pipe(gulp.dest(defaults.dev));
+        PATHS.src + '/third-party/**/*.{js,css,jpg,gif,png,jpeg,ttf,svg,map,ico,eot,ttf,woff}',
+    ], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
 });
 
-
-gulp.task('transform', function() {
-    return gulp.src(defaults.src + '/js/index.js')
-        .pipe(babel({
-            presets: ["babel-preset-env", "react"]
-        }))
-        .pipe(gulp.dest(defaults.dist + '/js'));
-})
-
-gulp.task('react:dev', function() {
+gulp.task('react:browserify', function() {
 
     var b = browserify({
-        entries: [defaults.src + '/js/index.js'], //entry file
+        entries: [PATHS.src + '/js/index.js'], //entry file
         // ignore: /\/node_modules\)/,
         debug: true
     });
@@ -284,34 +239,46 @@ gulp.task('react:dev', function() {
         .pipe(source('index.js'))
         // .pipe(buffer())
         // .pipe(uglify())
-        .pipe(gulp.dest(defaults.dist + '/js'));
-    // return browserify(defaults.src + '/js/app.js')
-    //     .bundle()
-    //     .on('error', gutil.log)
-    //     .pipe(source('app.js'))
-    //     .pipe(buffer())
-    //     .pipe(gulp.dest(defaults.dist + '/js'))
+        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+
 })
 
-//browserify -t [ babelify --presets [ es2015 react ] ] assets/src/js/index.js -o  assets/dist/js/index.js
+gulp.task('react:webpack', function() {
+return gulp.src(PATHS.src + '/js/index.js')
+  .pipe(webpack(require('./config/webpack.config.dev')))
+   // .pipe(buffer())
+   // .pipe(uglify())
+  .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+});
 
-
+gulp.task('webserver', function() {
+    gulp.src(PATHS.dist)
+      .pipe(webserver({
+        livereload: {
+          enable: true, // need this set to true to enable livereload
+          filter: function(fileName) {
+            if (fileName.match(/.map$/)) { // exclude all source maps from livereload
+              return false;
+            } else {
+              return true;
+            }
+          }
+        }
+      }));
+  });
+        
 gulp.task('default', ['build:dev'])
 gulp.task('dist', ['build:dist'])
-
 gulp.task('build-js:dev', function() {
     runSequence('bundle:js', ['js:dev'])
 });
-
-
 gulp.task('build:dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['js:dev', 'sass:dev', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch', function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js',  ['react:webpack','js:dev', 'sass:dev','copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch','webserver', function() {
         console.log('Waiting for changes...')
     })
 });
-
 gulp.task('build:dist', function() {
-    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['js:dist', 'sass:dist', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['react:webpack','js:dist', 'sass:dist','copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
         console.log('Finished deploy!')
     })
-});;
+});
