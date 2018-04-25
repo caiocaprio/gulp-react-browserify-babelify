@@ -71,7 +71,7 @@ gulp.task('sass:dev', function(pumpCb) {
             //     image: PATHS.dev + '/img',
             //     sourcemap: true
             // }),
-            gulp.dest(PATHS.dev + PATHS.assetsPath +'/css')
+            gulp.dest(PATHS.dev + PATHS.assetsPath + '/css')
         ],
         pumpCb
     );
@@ -91,7 +91,7 @@ gulp.task('sass:dist', function(pumpCb) {
             autoprefixer(),
             // replace(cdn.img.replace, cdn.img.url),
             // replace(cdn.font.replace, cdn.font.url),
-            gulp.dest(PATHS.dist + PATHS.assetsPath +'/css')
+            gulp.dest(PATHS.dist + PATHS.assetsPath + '/css')
         ],
         pumpCb
     );
@@ -111,7 +111,7 @@ gulp.task('js:dev', function(pumpCb) {
                 ignoreFiles: ['.combo.js', '-min.js']
             }),
             // sourcemaps.write('.'),
-            gulp.dest(PATHS.dev + PATHS.assetsPath +'/js')
+            gulp.dest(PATHS.dev + PATHS.assetsPath + '/js')
         ],
         pumpCb
     );
@@ -166,7 +166,7 @@ gulp.task('bundle:js', function() {
             ignoreFiles: ['.combo.js']
         }))
         .pipe(jsmin())
-        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath +'/js'));
+        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
 });
 
 gulp.task('sprite:dev', function() {
@@ -193,9 +193,11 @@ gulp.task('sprite:dist', function() {
 gulp.task('watch', function() {
     gulp.watch(PATHS.src + '/scss/**/*.scss', ['sass:dev']);
     gulp.watch(PATHS.src + '/js/es5/**/*.js', ['build-js:dev']);
-    gulp.watch(PATHS.src + '/js/(!bundle)**/*.js', ['react:webpack']);
+    gulp.watch([PATHS.src + '/js/**/*.{js,jsx,jsm}',
+        '!' + PATHS.src + '/js/es5/**/*.{js,jsx,jsm}'
+    ], ['react:webpack']);
     gulp.watch([PATHS.src + '/img/**/*',
-        '!' + PATHS.src + '/img/sprites{,/**/*}'
+        '!' + PATHS.src + '/img/sprites/**/*'
     ], ['copy:img']);
     gulp.watch(PATHS.src + '/font/sprites/**/*', ['sprite:dev']);
     gulp.watch(PATHS.src + '/font/**/*', ['copy:font']);
@@ -210,7 +212,7 @@ gulp.task('copy:html', function(pumpCb) {
     return gulp.src([PATHS.src + '/html/**/*'], { base: PATHS.src + '/html' }).pipe(gulp.dest(PATHS.dev));
 })
 gulp.task('copy:img', function(pumpCb) {
-    return gulp.src([PATHS.src + '/img/**/*', '!' + PATHS.src + '/img/sprites{,/**/*}'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev+PATHS.assetsPath));
+    return gulp.src([PATHS.src + '/img/**/*', '!' + PATHS.src + '/img/sprites{,/**/*}'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
 })
 gulp.task('copy:font', function(pumpCb) {
     return gulp.src([PATHS.src + '/font/**/*'], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
@@ -244,41 +246,46 @@ gulp.task('react:browserify', function() {
 })
 
 gulp.task('react:webpack', function() {
-return gulp.src(PATHS.src + '/js/index.js')
-  .pipe(webpack(require('./config/webpack.config.dev')))
-   // .pipe(buffer())
-   // .pipe(uglify())
-  .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+    return gulp.src(PATHS.src + '/js/index.js')
+        .pipe(webpack(require('./config/webpack.config.dev')))
+        // .pipe(buffer())
+        // .pipe(uglify())
+        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
 });
 
 gulp.task('webserver', function() {
     gulp.src(PATHS.dist)
-      .pipe(webserver({
-        livereload: {
-          enable: true, // need this set to true to enable livereload
-          filter: function(fileName) {
-            if (fileName.match(/.map$/)) { // exclude all source maps from livereload
-              return false;
-            } else {
-              return true;
+        .pipe(webserver({
+            livereload: {
+                enable: true, // need this set to true to enable livereload
+                filter: function(fileName) {
+                    if (fileName.match(/.map$/)) { // exclude all source maps from livereload
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
             }
-          }
-        }
-      }));
-  });
-        
+        }));
+});
+
 gulp.task('default', ['build:dev'])
 gulp.task('dist', ['build:dist'])
 gulp.task('build-js:dev', function() {
     runSequence('bundle:js', ['js:dev'])
 });
 gulp.task('build:dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js',  ['react:webpack','js:dev', 'sass:dev','copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch','webserver', function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+        console.log('Finished build:dev...')
+    })
+});
+gulp.task('dev', function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch', 'webserver', function() {
         console.log('Waiting for changes...')
     })
 });
 gulp.task('build:dist', function() {
-    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['react:webpack','js:dist', 'sass:dist','copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
-        console.log('Finished deploy!')
+    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['react:webpack', 'js:dist', 'sass:dist', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+        console.log('Finished build:dist!')
     })
 });

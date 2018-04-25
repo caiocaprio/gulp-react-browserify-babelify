@@ -14,6 +14,11 @@ const App = ({ title }) => (
          <Cards /> */}
         <div className="container">
             <Contentful/>
+            <Contentful/>
+            <Contentful/>
+            <Contentful/>
+            <Contentful/>
+        
         </div>
      </div>
 
