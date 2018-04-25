@@ -1,4 +1,5 @@
 module.exports = {
+    // mode: 'production',
     output: {
         filename: '[name].js',
         publicPath: '/'
@@ -9,7 +10,7 @@ module.exports = {
         //     styles: path.resolve(__dirname, '../src/scss')
         // }
     },
-    devtool: 'eval',
+    // devtool: 'eval',
     module: {
         rules: [
             {

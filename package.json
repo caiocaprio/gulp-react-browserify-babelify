@@ -58,6 +58,7 @@
     "run-sequence": "^2.2.1",
     "transform-runtime": "0.0.0",
     "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15",
     "webpack-livereload-plugin": "^2.1.1",
