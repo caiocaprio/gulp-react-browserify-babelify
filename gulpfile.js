@@ -17,16 +17,14 @@ const spritesmith = require('gulp.spritesmith');
 const rename = require('gulp-rename');
 const concat = require('gulp-concat')
 const jsmin = require('gulp-jsmin');
-const browserify = require('browserify');
-const gutil = require('gulp-util');
-const buffer = require('vinyl-buffer');
-const babelify = require('babelify');
-const webpack = require('webpack');
-const stream = require('webpack-stream');
+// const browserify = require('browserify');
+// const gutil = require('gulp-util');
+// const buffer = require('vinyl-buffer');
+// // const babelify = require('babelify');
+// const stream = require('webpack-stream');
 const package = require('./package.json');
-const webserver = require('gulp-webserver');
-const source = require('vinyl-source-stream');
-const webpackDevServer = require("webpack-dev-server");
+// const webserver = require('gulp-webserver');
+// const source = require('vinyl-source-stream');
 // var replace = require('gulp-replace');
 
 
@@ -142,7 +140,7 @@ gulp.task('bundle:js', function() {
         // PATHS.src + '/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
         // PATHS.src + '/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
         // PATHS.src + '/third-party/material-kit/assets/js/material-kit.min.js',
-        // PATHS.src + '/js/bundle/**/*.js'
+        PATHS.src + '/js/bundle/**/*.js'
     ])
 
     .pipe(concat('all.js'))
@@ -184,16 +182,16 @@ gulp.task('watch', function() {
     gulp.watch(PATHS.src + '/scss/**/*.scss', ['sass:dev']);
     gulp.watch(PATHS.src + '/js/static/**/*.js', ['static:js:dev']);
     gulp.watch(PATHS.src + '/js/bundle/**/*.js', ['bundle:js']);
-    gulp.watch([PATHS.src + '/js/**/*.{js,jsx,jsm}',
-        '!' + PATHS.src + '/js/static/**/*.{js,jsx,jsm}',
-        '!' + PATHS.src + '/js/bundle/**/*.{js,jsx,jsm}'
-    ], ['react:webpack']);
+    // gulp.watch([PATHS.src + '/js/**/*.{js,jsx,jsm}',
+    //     '!' + PATHS.src + '/js/static/**/*.{js,jsx,jsm}',
+    //     '!' + PATHS.src + '/js/bundle/**/*.{js,jsx,jsm}'
+    // ], ['react:webpack']);
     gulp.watch([PATHS.src + '/img/**/*',
         '!' + PATHS.src + '/img/sprites/**/*'
     ], ['copy:img']);
     gulp.watch(PATHS.src + '/font/sprites/**/*', ['sprite:dev']);
     gulp.watch(PATHS.src + '/font/**/*', ['copy:font']);
-    gulp.watch(PATHS.src + '/html/**/*', ['copy:html']);
+    // gulp.watch(PATHS.src + '/html/**/*', ['copy:html']);
     gulp.watch(PATHS.src + '/third-party/**/*', ['copy:third-party']);
     gulp.watch(PATHS.src + '/media/**/*', ['copy:media']);
 
@@ -218,139 +216,64 @@ gulp.task('copy:third-party', function(pumpCb) {
     ], { base: PATHS.src }).pipe(gulp.dest(PATHS.dev + PATHS.assetsPath));
 });
 
-gulp.task('react:browserify', function() {
+// gulp.task('react:browserify', function() {
 
-    var b = browserify({
-        entries: [PATHS.src + '/js/index.js'], //entry file
-        // ignore: /\/node_modules\)/,
-        debug: true
-    });
-    b.transform(babelify, {
-        presets: ["babel-preset-env", "react"],
-        plugins: ["transform-runtime", "transform-object-assign", "rewire", "lodash", "inline-replace-variables", "transform-object-rest-spread"]
-    }); // use the reactify transform
-    return b.bundle()
-        .pipe(source('index.js'))
-        .pipe(buffer())
-        .pipe(uglify())
-        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+//     var b = browserify({
+//         entries: [PATHS.src + '/js/index.js'], //entry file
+//         // ignore: /\/node_modules\)/,
+//         debug: true
+//     });
+// b.transform(babelify, {
+//         presets: ["babel-preset-env", "react"],
+//         plugins: ["transform-runtime", "transform-object-assign", "rewire", "lodash", "inline-replace-variables", "transform-object-rest-spread"]
+//     }); // use the reactify transform
+//     return b.bundle()
+//         .pipe(source('index.js'))
+//         .pipe(buffer())
+//         .pipe(uglify())
+//         .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
 
-})
+// })
 
-gulp.task('react:webpack', function() {
+// gulp.task('react:webpack', function() {
 
-    return gulp.src(PATHS.src + '/js/index.js')
-        .pipe(stream(require('./config/webpack.config.dev')))
-        //    .pipe(buffer())
-        //    .pipe(uglify())
-        .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
+//     return gulp.src(PATHS.src + '/js/index.js')
+//         .pipe(webpack(require('./config/webpack.config.dev')))
+//         //    .pipe(buffer())
+//         //    .pipe(uglify())
+//         .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
 
-});
+// });
 
-gulp.task('webserver', function() {
-    gulp.src(PATHS.dist)
-        .pipe(webserver({
-            livereload: {
-                enable: true, // need this set to true to enable livereload
-                filter: function(fileName) {
-                    if (fileName.match(/.map$/)) { // exclude all source maps from livereload
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-            }
-        }));
-});
-
-gulp.task('watch:webpack', function() {
-    gulp.watch(PATHS.src+'/js/**/*.js', ['webpack']);
-});
-
-gulp.task('webpack', [], function() {
-    console.log("opa")
-    return gulp.src(PATHS.src+'/js/index.js') // gulp looks for all source files under specified path
-    .pipe(sourcemaps.init()) // creates a source map which would be very helpful for debugging by maintaining the actual source code structure
-    .pipe(stream(require('./config/webpack.config.dev'))) // blend in the webpack config into the source files
-    .pipe(uglify())// minifies the code for better compression
-    .pipe(sourcemaps.write())
-    .pipe(gulp.dest(PATHS.dist+'/assets/js'));
-});
-
-gulp.task("webpack-dev-server", function(callback) {
-    // modify some webpack config options
-    var myConfig = Object.create(require('./config/webpack.config.dev'));
-    myConfig.devtool = "eval";
-    myConfig.mode = "development";
-    myConfig.entry = './src/js';
-    myConfig.cache = false;
-    myConfig.module = {
-            rules: [{
-                test: /.(jsx,js)?$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                options: {
-                    presets: [
-                        [
-                            'env',
-                            { modules: false },
-                        ],
-                    ],
-                }
-            }]
-        };
-        myConfig.resolve= {
-            modules: [
-                
-                './node_modules',
-                './src/js',
-            ],
-            extensions: ['.js', '.jsx', '.jsm'],
-        };
-     // Start a webpack-dev-server
-    new webpackDevServer(webpack(myConfig), {
-        // path: PATHS.dist,
-            inline: true,
-            contentBase: './dist',
-            hot:true,
-            port: 8080,
-            publicPath: myConfig.output.publicPath,
-            open: true,
-            overlay: {
-                warnings: true,
-                errors: true
-            },
-            stats: {
-                colors: true
-            }
-        }).listen(8080, "localhost", function(err) {
-        if (err) throw new gutil.PluginError("webpack-dev-server", err);
-        gutil.log("[webpack-dev-server]", "http://localhost:8080/index.html");
-    });
-});
-
-gulp.task('wp', ['webpack-dev-server', 'watch:webpack']);
+// gulp.task('webserver', function() {
+//     gulp.src(PATHS.dist)
+//         .pipe(webserver({
+//             livereload: {
+//                 enable: true, // need this set to true to enable livereload
+//                 filter: function(fileName) {
+//                     if (fileName.match(/.map$/)) { // exclude all source maps from livereload
+//                         return false;
+//                     } else {
+//                         return true;
+//                     }
+//                 }
+//             }
+//         }));
+// });
 
 gulp.task('default', ['build:dev'])
 gulp.task('dist', ['build:dist'])
-gulp.task('build-js:dev', function() {
-    runSequence('bundle:js', ['static:js:dev', 'bundle:js'])
-});
+    // gulp.task('build-js:dev', function() {
+    //     runSequence('bundle:js', ['static:js:dev', 'bundle:js'])
+    // });
 gulp.task('build:dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'static:js:dev', 'bundle:js', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js', 'static:js:dev', ['sass:dev', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
         console.log('Finished build:dev...')
     })
 });
-gulp.task('dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'static:js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch', function() {
-        console.log('Waiting for changes...')
-    })
-});
+
 gulp.task('build:dist', function() {
-    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['react:webpack', 'js:dist', 'sass:dist', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+    runSequence('clean:dist', 'sprite:dist', 'bundle:js', ['js:dist', 'sass:dist', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
         console.log('Finished build:dist!')
     })
 });
-
-
-

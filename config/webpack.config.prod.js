@@ -10,9 +10,10 @@ const package = require('../package.json');
 const PATHS = {
     src: path.join(__dirname, '../src'),
     dist: path.join(__dirname, '../dist'),
-    publicPath: './',
-    assetsPath: './public'
+    publicPath: '/',
+    assetsPath: '/assets'
 };
+
 
 module.exports = {
     context: __dirname,
