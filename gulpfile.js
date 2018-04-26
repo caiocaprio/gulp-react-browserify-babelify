@@ -21,10 +21,12 @@ const browserify = require('browserify');
 const gutil = require('gulp-util');
 const buffer = require('vinyl-buffer');
 const babelify = require('babelify');
-const webpack = require('webpack-stream');
+const webpack = require('webpack');
+const stream = require('webpack-stream');
 const package = require('./package.json');
 const webserver = require('gulp-webserver');
 const source = require('vinyl-source-stream');
+const webpackDevServer = require("webpack-dev-server");
 // var replace = require('gulp-replace');
 
 
@@ -238,7 +240,7 @@ gulp.task('react:browserify', function() {
 gulp.task('react:webpack', function() {
 
     return gulp.src(PATHS.src + '/js/index.js')
-        .pipe(webpack(require('./config/webpack.config.dev')))
+        .pipe(stream(require('./config/webpack.config.dev')))
         //    .pipe(buffer())
         //    .pipe(uglify())
         .pipe(gulp.dest(PATHS.dist + PATHS.assetsPath + '/js'));
@@ -260,6 +262,74 @@ gulp.task('webserver', function() {
             }
         }));
 });
+
+gulp.task('watch:webpack', function() {
+    gulp.watch(PATHS.src+'/js/**/*.js', ['webpack']);
+});
+
+gulp.task('webpack', [], function() {
+    console.log("opa")
+    return gulp.src(PATHS.src+'/js/index.js') // gulp looks for all source files under specified path
+    .pipe(sourcemaps.init()) // creates a source map which would be very helpful for debugging by maintaining the actual source code structure
+    .pipe(stream(require('./config/webpack.config.dev'))) // blend in the webpack config into the source files
+    .pipe(uglify())// minifies the code for better compression
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(PATHS.dist+'/assets/js'));
+});
+
+gulp.task("webpack-dev-server", function(callback) {
+    // modify some webpack config options
+    var myConfig = Object.create(require('./config/webpack.config.dev'));
+    myConfig.devtool = "eval";
+    myConfig.mode = "development";
+    myConfig.entry = './src/js';
+    myConfig.cache = false;
+    myConfig.module = {
+            rules: [{
+                test: /.(jsx,js)?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                options: {
+                    presets: [
+                        [
+                            'env',
+                            { modules: false },
+                        ],
+                    ],
+                }
+            }]
+        };
+        myConfig.resolve= {
+            modules: [
+                
+                './node_modules',
+                './src/js',
+            ],
+            extensions: ['.js', '.jsx', '.jsm'],
+        };
+     // Start a webpack-dev-server
+    new webpackDevServer(webpack(myConfig), {
+        // path: PATHS.dist,
+            inline: true,
+            contentBase: './dist',
+            hot:true,
+            port: 8080,
+            publicPath: myConfig.output.publicPath,
+            open: true,
+            overlay: {
+                warnings: true,
+                errors: true
+            },
+            stats: {
+                colors: true
+            }
+        }).listen(8080, "localhost", function(err) {
+        if (err) throw new gutil.PluginError("webpack-dev-server", err);
+        gutil.log("[webpack-dev-server]", "http://localhost:8080/index.html");
+    });
+});
+
+gulp.task('wp', ['webpack-dev-server', 'watch:webpack']);
 
 gulp.task('default', ['build:dev'])
 gulp.task('dist', ['build:dist'])
