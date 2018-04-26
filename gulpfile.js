@@ -65,13 +65,6 @@ gulp.task('sass:dev', function(pumpCb) {
             sass({ outputStyle: 'expanded' }).on('error', sass.logError),
             autoprefixer(),
             sourcemaps.write('.'),
-            // compass({
-            //     style: 'expanded',
-            //     css: PATHS.dev + '/css',
-            //     sass: PATHS.src + '/scss',
-            //     image: PATHS.dev + '/img',
-            //     sourcemap: true
-            // }),
             gulp.dest(PATHS.dev + PATHS.assetsPath + '/css')
         ],
         pumpCb
@@ -83,12 +76,6 @@ gulp.task('sass:dist', function(pumpCb) {
     pump([
             gulp.src(PATHS.src + '/scss/**/*.scss'),
             sass({ outputStyle: 'compressed' }).on('error', sass.logError),
-            // sass({
-            //     style: 'compressed',
-            //     css: PATHS.dev + '/css',
-            //     sass: PATHS.src + '/scss',
-            //     image: PATHS.dist + '/img'
-            // }),
             autoprefixer(),
             // replace(cdn.img.replace, cdn.img.url),
             // replace(cdn.font.replace, cdn.font.url),
@@ -99,9 +86,9 @@ gulp.task('sass:dist', function(pumpCb) {
 });
 
 /* JS DEV */
-gulp.task('js:dev', function(pumpCb) {
+gulp.task('static:js:dev', function(pumpCb) {
     pump([
-            gulp.src(PATHS.src + '/js/es5/**/*.js'),
+            gulp.src(PATHS.src + '/js/static/**/*.js'),
             minifyJs({
                 ext: {
                     src: '.js',
@@ -119,9 +106,9 @@ gulp.task('js:dev', function(pumpCb) {
 });
 
 /* JS DIST */
-gulp.task('js:dist', function(pumpCb) {
+gulp.task('static:js:dist', function(pumpCb) {
     pump([
-            gulp.src(PATHS.src + '/js/es5/**/*.js'),
+            gulp.src(PATHS.src + '/js/static/**/*.js'),
             minifyJs({
                 ext: {
                     src: '.debug.js',
@@ -141,19 +128,19 @@ gulp.task('js:dist', function(pumpCb) {
 /* JS BUNDLE */
 gulp.task('bundle:js', function() {
     return gulp.src([
-        PATHS.src + '/third-party/material-kit/assets/js/core/jquery.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/core/popper.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/bootstrap-material-design.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/moment.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-datetimepicker.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/nouislider.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-selectpicker.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-tagsinput.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/jasny-bootstrap.min.js',
-        PATHS.src + '/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
-        PATHS.src + '/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
-        PATHS.src + '/third-party/material-kit/assets/js/material-kit.min.js',
-        PATHS.src + '/js/es5/bundle/**/*.js'
+        // PATHS.src + '/third-party/material-kit/assets/js/core/jquery.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/core/popper.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/bootstrap-material-design.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/moment.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-datetimepicker.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/nouislider.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-selectpicker.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/bootstrap-tagsinput.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/jasny-bootstrap.min.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
+        // PATHS.src + '/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
+        // PATHS.src + '/third-party/material-kit/assets/js/material-kit.min.js',
+        // PATHS.src + '/js/bundle/**/*.js'
     ])
 
     .pipe(concat('all.js'))
@@ -193,9 +180,11 @@ gulp.task('sprite:dist', function() {
 /* SASS WATCH */
 gulp.task('watch', function() {
     gulp.watch(PATHS.src + '/scss/**/*.scss', ['sass:dev']);
-    gulp.watch(PATHS.src + '/js/es5/**/*.js', ['build-js:dev']);
+    gulp.watch(PATHS.src + '/js/static/**/*.js', ['static:js:dev']);
+    gulp.watch(PATHS.src + '/js/bundle/**/*.js', ['bundle:js']);
     gulp.watch([PATHS.src + '/js/**/*.{js,jsx,jsm}',
-        '!' + PATHS.src + '/js/es5/**/*.{js,jsx,jsm}'
+        '!' + PATHS.src + '/js/static/**/*.{js,jsx,jsm}',
+        '!' + PATHS.src + '/js/bundle/**/*.{js,jsx,jsm}'
     ], ['react:webpack']);
     gulp.watch([PATHS.src + '/img/**/*',
         '!' + PATHS.src + '/img/sprites/**/*'
@@ -275,15 +264,15 @@ gulp.task('webserver', function() {
 gulp.task('default', ['build:dev'])
 gulp.task('dist', ['build:dist'])
 gulp.task('build-js:dev', function() {
-    runSequence('bundle:js', ['js:dev'])
+    runSequence('bundle:js', ['static:js:dev', 'bundle:js'])
 });
 gulp.task('build:dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'static:js:dev', 'bundle:js', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], function() {
         console.log('Finished build:dev...')
     })
 });
 gulp.task('dev', function() {
-    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch', 'webserver', function() {
+    runSequence('clean:dev', 'sprite:dev', 'bundle:js', ['react:webpack', 'static:js:dev', 'sass:dev', 'copy:html', 'copy:img', 'copy:font', 'copy:media', 'copy:third-party'], 'watch', function() {
         console.log('Waiting for changes...')
     })
 });
@@ -292,3 +281,6 @@ gulp.task('build:dist', function() {
         console.log('Finished build:dist!')
     })
 });
+
+
+
