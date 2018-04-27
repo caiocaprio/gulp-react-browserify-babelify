@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 
 // // require('babelify-es6-polyfill');
 
-import Home from './pages/Home';
+import App from './app';
 // import Sass from './../scss/main.scss';
 
 // require('Bundle');
@@ -14,5 +14,5 @@ import Home from './pages/Home';
 
 
 
-render( <Home /> , document.querySelector('#app'));
+render( <App /> , document.querySelector('#app'));
 // {/* render( <h1>teste</h1> , document.querySelector('#app')); */}

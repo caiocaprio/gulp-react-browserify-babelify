@@ -24,3 +24,4 @@ const H6 = ({type, ...props }) => {
     return <h6 {...props}/>;   
 }
 
+export default H1
