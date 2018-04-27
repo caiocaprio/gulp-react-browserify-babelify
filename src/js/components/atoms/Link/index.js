@@ -1,42 +1,25 @@
 import React from 'react';
-
-const STATUS = {
-    HOVERED: 'hovered',
-    NORMAL: 'normal',
-};
+import PropTypes from 'prop-types'
 
 /**
- * 
- * 
- * @export
- * @class Link
- * @extends {React.Component}
+ * @default {type:'link', target:'_self'}
+ * @param {any} {type, ...props } 
+ * @returns Link Element
  */
-export default class Link extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this._onMouseEnter = this._onMouseEnter.bind(this);
-        this._onMouseLeave = this._onMouseLeave.bind(this);
-
-        this.state = {
-            class: STATUS.NORMAL,
-        };
-    }
-
-    _onMouseEnter() {
-        this.setState({ class: STATUS.HOVERED });
-    }
-
-    _onMouseLeave() {
-        this.setState({ class: STATUS.NORMAL });
-    }
-
-    render() {
-        return ( <a className = { this.state.class }
-            href = { this.props.page || '#' }
-            onMouseEnter = { this._onMouseEnter }
-            onMouseLeave = { this._onMouseLeave } > { this.props.children } </a>
-        );
-    }
+const Link = ({type, ...props }) => {
+    return <link {...props}/>;   
 }
+
+Link.propTypes = {
+    target:PropTypes.string,
+    type: PropTypes.string,
+    href:PropTypes.string
+}
+  
+Link.defaultProps = {
+    href:'#',
+    target:'_self'
+}
+ 
+
+export default Link;

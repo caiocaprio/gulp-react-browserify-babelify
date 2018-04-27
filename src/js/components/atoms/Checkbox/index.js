@@ -1,13 +1,54 @@
 
-import React from 'react';
+import React, {Component} from 'react';
 
-export default class CheckboxWithLabel extends React.Component {
+/**
+ * @class Checkbox
+ * @extends {Component}
+ * @return Checkbox Element
+ */
+class Checkbox extends Component {
   constructor(props) {
     super(props);
     this.state = {isChecked: false};
+    this.onChange = this.onChange.bind(this);
+  }
 
-    // bind manually because React class components don't auto-bind
-    // http://facebook.github.io/react/blog/2015/01/27/react-v0.13.0-beta-1.html#autobinding
+  onChange() {
+    this.setState({isChecked: !this.state.isChecked});
+  }
+
+  render() {
+    return (
+        <input
+          type="checkbox"
+          checked={this.state.isChecked}
+          onChange={this.onChange}
+        />
+    );
+  }
+}
+
+Checkbox.propTypes = {
+  onChange: PropTypes.func,
+  checked:PropTypes.bool,
+};
+
+export default Checkbox;
+
+
+
+
+
+/**
+ * @default: {labelOn:'checkbox', labelOff:'checkbox'}
+ * @class CheckboxWithLabel
+ * @extends {Component}
+ * @return CheckboxWithLabel Element
+ */
+class CheckboxWithLabel extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {isChecked: false};
     this.onChange = this.onChange.bind(this);
   }
 
@@ -28,3 +69,20 @@ export default class CheckboxWithLabel extends React.Component {
     );
   }
 }
+
+CheckboxWithLabel.propTypes = {
+  onChange: PropTypes.func,
+  checked:PropTypes.bool,
+  labelOn:PropTypes.string,
+  labelOff:PropTypes.string
+};
+
+CheckboxWithLabel.defaultProps = {
+  labelOn:'checkbox',
+  labelOff:'checkbox'
+};
+
+export default CheckboxWithLabel;
+
+
+
