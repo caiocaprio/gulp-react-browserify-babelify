@@ -10,16 +10,17 @@ const package = require('../package.json');
 const PATHS = {
     src: path.join(__dirname, '../src'),
     dist: path.join(__dirname, '../dist'),
-    publicPath: '/',
-    assetsPath: '/assets'
+    publicPath: './',
+    assetsPath: '/assets' 
 };
 
 
 module.exports = {
+    bail:true,
     context: __dirname,
     mode: 'production',
     entry: {
-        'public/js/app': [PATHS.src + '/js'],
+        'assets/js/app': [PATHS.src + '/js'],
         // 'public/js/all': [
         //     PATHS.src + '/public/third-party/material-kit/assets/js/core/jquery.min.js',
         //     PATHS.src + '/public/third-party/material-kit/assets/js/core/popper.min.js',
@@ -61,6 +62,7 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.jsx', '.jsm'],
         alias: {
+            
             styles: path.resolve(__dirname, '../src/scss')
         },
         modules: [
@@ -110,8 +112,7 @@ module.exports = {
         ]
     },
     plugins: [
-        new ExtractTextPlugin(path.join(PATHS.assetsPath, '/css/main.css')),
-
+        new ExtractTextPlugin(path.join(PATHS.publicPath, PATHS.assetsPath, '/css/main.css')),
         new HtmlWebpackPlugin({
             template: '../node_modules/html-webpack-template/index.ejs',
             title: 'Nextel',
@@ -127,49 +128,58 @@ module.exports = {
                 html5: true
             },
             mobile: true,
-            scripts: [PATHS.assetsPath + 'js/all.min.js', PATHS.assetsPath + 'js/main.js']
-        }),
-        new HtmlWebpackIncludeAssetsPlugin({
-            assets: [
-                PATHS.src + '/public/js/main.js'
-            ],
-            append: false,
-            publicPath: PATHS.publicPath + PATHS.assetsPath
-        }),
-        new CopyWebpackPlugin([{
-                from: path.join(PATHS.src, PATHS.assetsPath, '/img'),
-                to: path.join(PATHS.dist, PATHS.assetsPath, '/img')
-            },
-            {
-                from: path.join(PATHS.src, '/third-party'),
-                to: path.join(PATHS.dist, PATHS.assetsPath, '/third-party'),
-                ignore: ['*.scss',
-                    '*.sass',
-                    '*.css',
-                    '*.map',
-                    '*.sh',
-                    '*.enc',
-                    '*.yml',
-                    '*.md',
-                    '*.html',
-                    '*.json',
-                    '*.pdf',
-                    '*.js',
-                    '*.xml',
-                    '*.gitignore',
-                    '*.gitattributes',
-                    '*.editorconfig',
-                    '*.stylelintignore',
-                    '*.stylelintrc',
-                    '*.lock',
-                    '*.txt',
-                    '*.nuspec',
-                    '*.htmllintrc',
-                    '*.eslintignore'
-                ]
+            links: [
 
-            }
-        ]),
+                {
+                    href: PATHS.publicPath+ PATHS.assetsPath + "/css/main.css",
+                    rel: 'stylesheet',
+                    type: 'text/css'
+                },
+            ],
+            scripts: [PATHS.publicPath + PATHS.assetsPath + '/js/all.min.js']
+                // scripts: [PATHS.assetsPath + '/js/app.js']
+        }),
+        // new HtmlWebpackIncludeAssetsPlugin({
+        //     assets: [
+        //         PATHS.src + '/public/js/main.js'
+        //     ],
+        //     append: false,
+        //     publicPath: PATHS.publicPath + PATHS.assetsPath
+        // }),
+        // new CopyWebpackPlugin([{
+        //         from: path.join(PATHS.src, PATHS.assetsPath, '/img'),
+        //         to: path.join(PATHS.dist, PATHS.assetsPath, '/img')
+        //     },
+        //     {
+        //         from: path.join(PATHS.src, '/third-party'),
+        //         to: path.join(PATHS.dist, PATHS.assetsPath, '/third-party'),
+        //         ignore: ['*.scss',
+        //             '*.sass',
+        //             '*.css',
+        //             '*.map',
+        //             '*.sh',
+        //             '*.enc',
+        //             '*.yml',
+        //             '*.md',
+        //             '*.html',
+        //             '*.json',
+        //             '*.pdf',
+        //             '*.js',
+        //             '*.xml',
+        //             '*.gitignore',
+        //             '*.gitattributes',
+        //             '*.editorconfig',
+        //             '*.stylelintignore',
+        //             '*.stylelintrc',
+        //             '*.lock',
+        //             '*.txt',
+        //             '*.nuspec',
+        //             '*.htmllintrc',
+        //             '*.eslintignore'
+        //         ]
+
+        //     }
+        // ]),
         new webpack.DefinePlugin({
             PRODUCTION: JSON.stringify(true)
         })

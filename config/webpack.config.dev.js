@@ -126,14 +126,9 @@ module.exports = {
         })
     ],
     devServer: {
-        contentBase: [
-            PATHS.dist + '/',
-            PATHS.dist + '/assets/js',
-            PATHS.dist + '/assets/css',
-            PATHS.dist + '/assets/img',
-            PATHS.dist + '/assets/font',
-            PATHS.dist + '/assets/third-party',
-        ],
+        contentBase: 
+            PATHS.dist + '/'
+        ,
         compress: true,
         headers: {
             'X-Content-Type-Options': 'nosniff',
@@ -148,6 +143,7 @@ module.exports = {
         publicPath: 'http://localhost:8080/',
         hot: true,
         watchContentBase: true,
+        historyApiFallback: true,
         watchOptions: {
             poll: true
         }

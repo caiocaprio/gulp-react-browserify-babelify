@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
+// import registerServiceWorker from './registerServiceWorker';
 
 // // require('babelify-es6-polyfill');
 
@@ -15,4 +16,5 @@ import App from './app';
 
 
 render( <App /> , document.querySelector('#app'));
+// registerServiceWorker();
 // {/* render( <h1>teste</h1> , document.querySelector('#app')); */}
