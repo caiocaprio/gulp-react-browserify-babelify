@@ -26,10 +26,10 @@ ng\:form {
 }
 
 * {
-    @include selection {
-        color: #fff;
+    @include selection {   
+        color: #fff;  
         background: #f26522;
-    }
+    }  
 }
 
 .overflow-hidden {
@@ -42,18 +42,19 @@ ng\:form {
 }
 
 html {
+    background-attachment: red;  
     position: relative;
     overflow-x: hidden;
     &.nav-open {
         @media (max-width: $screen-sm-max) {
-            overflow-y: hidden;
+            overflow-y: hidden;   
         }
     }
     font-size: $font-size-default;
-    &.size--1 {
+    &.size--1 { 
         font-size: $font-size-default - 2;
     }
-    &.size-1 {
+    &.size-1 { 
         font-size: $font-size-default + 2;
     }
     &.size-2 {

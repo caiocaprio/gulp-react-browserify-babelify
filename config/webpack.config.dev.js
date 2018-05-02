@@ -126,9 +126,11 @@ module.exports = {
         })
     ],
     devServer: {
-        contentBase: 
-            PATHS.dist + '/'
-        ,
+        contentBase: [
+                PATHS.dist + '/',
+                PATHS.dist + '/assets/css',
+                PATHS.dist + '/assets/js',
+        ],            
         compress: true,
         headers: {
             'X-Content-Type-Options': 'nosniff',
@@ -146,6 +148,7 @@ module.exports = {
         historyApiFallback: true,
         watchOptions: {
             poll: true
+            // aggregateTimeout: 2000
         }
     },
     stats: {
