@@ -16,5 +16,10 @@ import App from './app';
 
 
 render( <App /> , document.querySelector('#app'));
+ if (process.env.NODE_ENV !== 'production') {
+       console.log('Development mode!');
+     }else{
+        console.log('Production mode!');
+     }
 // registerServiceWorker();
 // {/* render( <h1>teste</h1> , document.querySelector('#app')); */}

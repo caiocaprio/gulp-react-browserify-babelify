@@ -2,10 +2,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
+const common = require('./webpack.common.config.js');
+const merge = require('webpack-merge');
+const webServer = require('./webpackWebServer.config.js');
 
-const package = require('../package.json');
+// const package = require('../package.json');
 
 const PATHS = {
     src: path.join(__dirname, '../src'),
@@ -15,63 +19,23 @@ const PATHS = {
 };
 
 
-module.exports = {
-    bail:true,
-    context: __dirname,
+module.exports = merge(common,{
+    // bail:true,
     mode: 'production',
-    entry: {
-        'assets/js/app': [PATHS.src + '/js'],
-        // 'public/js/all': [
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/core/jquery.min.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/core/popper.min.js',
-        //     // PATHS.src + '/public/third-party/material-kit/assets/js/bootstrap-material-design.js',
-        //     // PATHS.src + '/public/third-party/material-kit/assets/js/plugins/moment.min.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/bootstrap-datetimepicker.min.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/nouislider.min.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/bootstrap-selectpicker.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/bootstrap-tagsinput.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/jasny-bootstrap.min.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/plugins/jquery.flexisel.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/assets-for-demo/js/modernizr.js',
-        //     PATHS.src + '/public/third-party/material-kit/assets/js/material-kit.min.js',
-        //     // PATHS.src + '/public/js/bundle/**/*.js',
-        //     PATHS.src + '/public/js/main.js'
-        // ],
-        // 'public/js/vendors': Object.keys(package.dependencies)
-    },
-    output: {
-        path: PATHS.dist,
-        filename: '[name].[chunkhash].js',
-        publicPath: PATHS.publicPath
-    },
+    devtool: 'source-map',
     optimization: {
         runtimeChunk: false,
         splitChunks: false,
-        // runtimeChunk: 'single',
-        // splitChunks: {
-        //     cacheGroups: {
-        //         vendors: {
-        //             test: /[\\/]node_modules[\\/]/,
-        //             name: 'public/js/vendors',
-        //             enforce: true,
-        //             chunks: 'all'
-        //         }
-        //     }
-        // }
     },
     resolve: {
         extensions: ['.js', '.jsx', '.jsm'],
         alias: {
-            
             styles: path.resolve(__dirname, '../src/scss')
-        },
-        modules: [
-            'src',
-            'node_modules'
-        ]
+        }
     },
     module: {
-        rules: [{
+        rules: [
+            {
                 test: /\.scss$/,
                 use: ExtractTextPlugin.extract({
                     use: [{
@@ -103,7 +67,8 @@ module.exports = {
             {
                 test: /.jsx?$/,
                 exclude: /node_modules/,
-                loader: 'babel-loader'
+                loader: 'babel-loader',
+
             },
             {
                 test: /\.(jpg|png)$/,
@@ -137,7 +102,10 @@ module.exports = {
                 },
             ],
             scripts: [PATHS.publicPath + PATHS.assetsPath + '/js/all.min.js']
-                // scripts: [PATHS.assetsPath + '/js/app.js']
+            // scripts: [PATHS.assetsPath + '/js/app.js']
+        }),
+        new UglifyJSPlugin({
+            sourceMap: true
         }),
         // new HtmlWebpackIncludeAssetsPlugin({
         //     assets: [
@@ -181,7 +149,8 @@ module.exports = {
         //     }
         // ]),
         new webpack.DefinePlugin({
-            PRODUCTION: JSON.stringify(true)
+            // PRODUCTION: JSON.stringify(true)
+            'process.env.NODE_ENV': JSON.stringify('production')
         })
     ]
-};
+});

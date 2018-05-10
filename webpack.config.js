@@ -8,3 +8,9 @@ if (TARGET === 'build' || TARGET === 'stats') {
     module.exports = require('./config/webpack.config.prod');
     console.info('--> ./config/webpack.config.prod.js');
 }
+
+if (TARGET === 'start') {
+    module.exports = require('./config/webpackWebServer.config');
+    console.info('--> ./config/webpackWebServer.config.js');
+}
+

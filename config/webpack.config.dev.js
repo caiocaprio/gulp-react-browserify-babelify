@@ -4,9 +4,10 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 const webpack = require('webpack');
 const path = require('path');
+const merge = require('webpack-merge');
+const common = require('./webpack.common.config.js');
 
 
-const package = require('../package.json');
 const PATHS = {
     src: path.join(__dirname, '../src'),
     dist: path.join(__dirname, '../dist'),
@@ -14,19 +15,9 @@ const PATHS = {
     assetsPath: '/assets'
 };
 
-module.exports = {
-    context: __dirname,
-    mode: 'development',
-    entry: {
-        'assets/js/app': [PATHS.src + '/js'],
-        'assets/js/vendors': Object.keys(package.dependencies)
 
-    },
-    output: {
-        path: PATHS.dist,
-        filename: '[name].js',
-        publicPath: PATHS.publicPath
-    },
+module.exports = merge(common,{
+    mode: 'development',
     optimization: {
         runtimeChunk: 'single',
         // runtimeChunk: false,
@@ -50,7 +41,8 @@ module.exports = {
     },
     devtool: 'eval',
     module: {
-        rules: [{
+        rules: [
+            {
                 test: /\.scss$/,
                 use: ExtractTextPlugin.extract({
                     use: [{
@@ -93,65 +85,14 @@ module.exports = {
     },
     plugins: [
         new ExtractTextPlugin(path.join(PATHS.assetsPath, '/css/main.css')),
-        new HtmlWebpackPlugin({
-            template: '../node_modules/html-webpack-template/index.ejs',
-            title: 'Nextel',
-            favicon: '../src/img/favicon.ico',
-            meta: [{ name: 'robots', content: 'noindex,nofollow' }],
-            appMountIds: ['app'],
-            inject: false,
-            minify: {
-                collapseWhitespace: true,
-                conservativeCollapse: true,
-                preserveLineBreaks: true,
-                useShortDoctype: true,
-                html5: true
-            },
-            mobile: true,
-            links: [
-
-                {
-                    href: PATHS.assetsPath + "/css/main.css",
-                    rel: 'stylesheet',
-                    type: 'text/css'
-                },
-            ],
-            scripts: [PATHS.assetsPath + '/js/all.min.js', PATHS.assetsPath + '/js/app.js']
-                // scripts: [PATHS.assetsPath + '/js/app.js']
-        }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NamedModulesPlugin(),
         new webpack.DefinePlugin({
-            PRODUCTION: JSON.stringify(false)
+            // PRODUCTION: JSON.stringify(true)
+            'process.env.NODE_ENV': JSON.stringify('development')
         })
     ],
-    devServer: {
-        contentBase: [
-                PATHS.dist + '/',
-                PATHS.dist + '/assets/css',
-                PATHS.dist + '/assets/js',
-        ],            
-        compress: true,
-        headers: {
-            'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': 'DENY'
-        },
-        open: true,
-        overlay: {
-            warnings: true,
-            errors: true
-        },
-        port: 8080,
-        publicPath: 'http://localhost:8080/',
-        hot: true,
-        watchContentBase: true,
-        historyApiFallback: true,
-        watchOptions: {
-            poll: true
-            // aggregateTimeout: 2000
-        }
-    },
     stats: {
         children: false
     }
-};
+});
